@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hiệu ứng khi chọn tag */
+button[class*="bg-blue-600"] {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Transition mượt mà */
+button {
+    transition: all 0.2s ease;
+}
