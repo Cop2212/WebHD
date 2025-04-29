@@ -14,10 +14,3 @@
         </div>
     </div>
 @endforeach
-
-<!-- Phân trang -->
-<div class="mt-4">
-    <div id="pagination-links" @click.prevent="handlePagination($event)">
-        {{ $questions->links() }}
-    </div>
-</div>
