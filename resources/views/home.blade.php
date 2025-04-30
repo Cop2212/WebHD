@@ -78,6 +78,14 @@ function sidebar() {
 
         // Khởi tạo component
         init() {
+
+            if (typeof Livewire !== 'undefined') {
+        Livewire.hook('commit', ({ component }) => {
+            if (component.id === this.$wire.__instance.id) {
+                this.syncFromUrl();
+            }
+        });
+    }
             this.syncFromUrl();
             window.addEventListener('popstate', () => this.syncFromUrl());
             console.log('Alpine sidebar initialized');
@@ -103,62 +111,66 @@ function sidebar() {
 
         // Lọc câu hỏi
         async filterQuestions(page = 1) {
-            this.loading = true;
-            try {
-                const query = new URLSearchParams();
+    this.loading = true;
+    try {
+        const query = new URLSearchParams();
 
-                if (this.selectedTags.length > 0) {
-                    query.append('tags', this.selectedTags.join(','));
-                }
+        if (this.selectedTags.length > 0) {
+            query.append('tags', this.selectedTags.join(','));
+        }
 
-                if (page > 1) {
-                    query.append('page', page);
-                }
+        if (page > 1) {
+            query.append('page', page);
+        }
 
-                console.log('Fetching questions with:', query.toString());
-                const response = await fetch(`/questions/filter?${query.toString()}`);
+        // Sử dụng URL gốc (/) thay vì /questions/filter
+        const url = `/?${query.toString()}`;
+        console.log('Fetching:', url);
 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-                const data = await response.json();
-
-                // Cập nhật DOM
-                const questionsContainer = document.getElementById('questions-container');
-                const paginationContainer = document.getElementById('pagination-container');
-
-                if (questionsContainer) questionsContainer.innerHTML = data.html;
-                if (paginationContainer && data.pagination) {
-                    paginationContainer.innerHTML = data.pagination;
-                }
-
-                this.updateUrl(page);
-            } catch (error) {
-                console.error('Filter error:', error);
-                alert('Error loading questions. Please try again.');
-            } finally {
-                this.loading = false;
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
-        },
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+
+        // Cập nhật DOM
+        document.getElementById('questions-container').innerHTML = data.html;
+
+        const paginationContainer = document.getElementById('pagination-container');
+        if (paginationContainer && data.pagination) {
+            paginationContainer.innerHTML = data.pagination;
+        }
+
+        // Cập nhật URL nhưng giữ nguyên path gốc
+        this.updateUrl(page);
+    } catch (error) {
+        console.error('Filter error:', error);
+    } finally {
+        this.loading = false;
+    }
+},
 
         // Cập nhật URL
         updateUrl(page = 1) {
-            const params = new URLSearchParams();
+    const params = new URLSearchParams();
 
-            if (this.selectedTags.length > 0) {
-                params.append('tags', this.selectedTags.join(','));
-            }
+    if (this.selectedTags.length > 0) {
+        params.set('tags', this.selectedTags.join(','));
+    }
 
-            if (page > 1) {
-                params.append('page', page);
-            }
+    params.set('page', page > 1 ? page : ''); // Xóa page nếu = 1
 
-            const newUrl = params.toString()
-                ? `${window.location.pathname}?${params.toString()}`
-                : window.location.pathname;
+    // Luôn giữ nguyên pathname gốc
+    const newUrl = `${window.location.pathname}?${params.toString()}`.replace(/\?$/, '');
 
-            history.pushState(null, '', newUrl);
-            console.log('URL updated:', newUrl);
-        },
+    history.pushState(null, '', newUrl);
+    console.log('URL updated:', newUrl);
+},
 
         // Xóa bộ lọc
         clearFilters() {
@@ -172,13 +184,19 @@ function sidebar() {
     document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('click', function(e) {
     const paginationLink = e.target.closest('.pagination a');
-    if (paginationLink) {
-        e.preventDefault();
-        const alpineComponent = document.querySelector('[x-data]').__x.$data;
-        const url = new URL(paginationLink.href);
-        const page = url.searchParams.get('page') || 1;
-        alpineComponent.filterQuestions(page);
+    if (!paginationLink) return;
+
+    e.preventDefault();
+    const alpineComponent = document.querySelector('[x-data]')?.__x?.$data;
+
+    if (!alpineComponent) {
+        console.error('Alpine component not found');
+        return;
     }
+
+    // Lấy page từ href nhưng bỏ qua path không cần thiết
+    const page = new URL(paginationLink.href).searchParams.get('page') || 1;
+    alpineComponent.filterQuestions(page);
 });
 
 // Nếu dùng Livewire, thêm phần này
