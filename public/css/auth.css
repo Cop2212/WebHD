@@ -1,0 +1,189 @@
+/* ===== Biến màu sắc ===== */
+:root {
+    --primary-color: #4e73df;
+    --primary-dark: #2e59d9;
+    --light-color: #ffffff;
+    --dark-color: #5a5c69;
+    --gray-light: #f8f9fc;
+    --danger-color: #e74a3b;
+    --success-color: #1cc88a;
+    --border-radius: 0.35rem;
+    --box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    --transition: all 0.3s ease;
+  }
+
+  /* ===== Layout chung ===== */
+  .auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background-color: var(--gray-light);
+    padding: 2rem 0;
+  }
+
+  .auth-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+  }
+
+  .auth-card .card-body {
+    padding: 2.5rem;
+  }
+
+  /* ===== Tiêu đề ===== */
+  .auth-card .text-center {
+    margin-bottom: 2rem;
+  }
+
+  .auth-card h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--dark-color);
+  }
+
+  .auth-card i.fas {
+    color: var(--primary-color);
+  }
+
+  /* ===== Form elements ===== */
+  .auth-card .form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .auth-card .form-control {
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #d1d3e2;
+    transition: var(--transition);
+  }
+
+  .auth-card .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+  }
+
+  .auth-card .form-check-input {
+    margin-top: 0.2rem;
+  }
+
+  /* ===== Buttons ===== */
+  .auth-card .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 0.75rem;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+
+  .auth-card .btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+  }
+
+  .auth-card .btn-primary i {
+    margin-right: 0.5rem;
+  }
+
+  /* ===== Error states ===== */
+  .auth-card .is-invalid {
+    border-color: var(--danger-color);
+  }
+
+  .auth-card .invalid-feedback {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  /* ===== Links ===== */
+  .auth-card a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .auth-card a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+  }
+
+  /* ===== Terms checkbox ===== */
+  .auth-card .form-check-label {
+    font-size: 0.9rem;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 576px) {
+    .auth-card .card-body {
+      padding: 1.5rem;
+    }
+
+    .auth-card h2 {
+      font-size: 1.5rem;
+    }
+
+    .auth-card i.fas {
+      font-size: 2.5rem;
+    }
+  }
+
+
+/* ===== Layout Structure ===== */
+.auth-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-wrapper {
+    display: flex;
+    flex: 1;
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 70px;
+        overflow: hidden;
+    }
+
+    .sidebar-header h4,
+    .sidebar-menu li a span {
+        display: none;
+    }
+
+    .sidebar-menu li a {
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    .sidebar-menu li a i {
+        margin-right: 0;
+        font-size: 1.2rem;
+    }
+}
+
+footer a {
+    text-decoration: none;
+    transition: opacity 0.3s;
+}
+
+footer a:hover {
+    opacity: 0.8;
+}
+
+.social-links i {
+    font-size: 1.2rem;
+}

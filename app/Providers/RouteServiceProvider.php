@@ -10,7 +10,7 @@ class RouteServiceProvider extends ServiceProvider
     /**
      * Đường dẫn mặc định sau khi đăng nhập.
      */
-    public const HOME = '/home'; // <-- Bạn có thể đổi thành /dashboard hoặc /admin
+    public const HOME = '/'; // <-- Bạn có thể đổi thành /dashboard hoặc /admin
 
     public function boot()
     {

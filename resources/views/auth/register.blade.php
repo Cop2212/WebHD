@@ -1,95 +1,86 @@
-@extends('layouts.guest')
+@extends('layouts.auth')
 
-@section('title', 'Đăng ký tài khoản')
+@section('title', 'Đăng ký')
 
 @section('content')
-<div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden md:max-w-2xl mt-10">
-    <div class="p-8">
-        <div class="flex justify-center mb-6">
-            <i class="fas fa-user-plus text-5xl text-blue-500"></i>
-        </div>
-
-        <h2 class="text-center text-2xl font-bold text-gray-800 mb-6">Đăng ký tài khoản</h2>
-
-        <form method="POST" action="{{ route('register') }}">
-            @csrf
-
-            <!-- Name -->
-            <div class="mb-4">
-                <label for="name" class="block text-gray-700 text-sm font-bold mb-2">
-                    <i class="fas fa-user mr-2"></i>Họ và tên
-                </label>
-                <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập họ tên">
-                @error('name')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
+<div class="auth-container @auth with-sidebar @endauth">
+    <div class="card auth-card">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                <h2>Đăng ký tài khoản</h2>
             </div>
 
-            <!-- Thêm sau trường name -->
-<div class="mb-4">
-    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">
-        <i class="fas fa-at mr-2"></i>Tên đăng nhập
-    </label>
-    <input id="username" type="text" name="username" value="{{ old('username') }}" required
-        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Nhập tên đăng nhập (không dấu, không khoảng cách)">
-    @error('username')
-        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-    @enderror
-</div>
+            <form method="POST" action="{{ route('register') }}">
+                @csrf
 
-            <!-- Email -->
-            <div class="mb-4">
-                <label for="email" class="block text-gray-700 text-sm font-bold mb-2">
-                    <i class="fas fa-envelope mr-2"></i>Email
-                </label>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập email">
-                @error('email')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
-            </div>
+                <!-- Name -->
+                <div class="mb-3">
+                    <label class="form-label">Họ và tên</label>
+                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+                           value="{{ old('name') }}" required autofocus>
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
-            <!-- Password -->
-            <div class="mb-4">
-                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">
-                    <i class="fas fa-lock mr-2"></i>Mật khẩu
-                </label>
-                <input id="password" type="password" name="password" required
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập mật khẩu (tối thiểu 8 ký tự)">
-                @error('password')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
-            </div>
+                <!-- Username -->
+                <div class="mb-3">
+                    <label for="username" class="form-label">Tên đăng nhập</label>
+                    <input id="username" type="text"
+                           class="form-control @error('username') is-invalid @enderror"
+                           name="username" value="{{ old('username') }}" required>
+                    @error('username')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="text-muted">Chỉ chứa chữ cái, số và dấu gạch dưới</small>
+                </div>
 
-            <!-- Confirm Password -->
-            <div class="mb-6">
-                <label for="password_confirmation" class="block text-gray-700 text-sm font-bold mb-2">
-                    <i class="fas fa-lock mr-2"></i>Xác nhận mật khẩu
-                </label>
-                <input id="password_confirmation" type="password" name="password_confirmation" required
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Nhập lại mật khẩu">
-            </div>
+                <!-- Email -->
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                           value="{{ old('email') }}" required>
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
-            <!-- Submit Button -->
-            <div class="flex items-center justify-between">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline">
-                    <i class="fas fa-user-plus mr-2"></i> Đăng ký
+                <!-- Password -->
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu</label>
+                    <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
+                    @error('password')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label class="form-label">Xác nhận mật khẩu</label>
+                    <input type="password" name="password_confirmation" class="form-control" required>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input @error('terms') is-invalid @enderror" name="terms" id="terms">
+                    <label class="form-check-label" for="terms">
+                        Tôi đồng ý với <a href="#">điều khoản sử dụng</a>
+                    </label>
+                    @error('terms')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                    <i class="fas fa-user-plus me-2"></i> Đăng ký
                 </button>
-            </div>
 
-            <!-- Login Link -->
-            <div class="text-center mt-4">
-                <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="{{ route('login') }}">
-                    Đã có tài khoản? Đăng nhập ngay
-                </a>
-            </div>
-        </form>
+                <div class="text-center">
+                    Đã có tài khoản? <a href="{{ route('login') }}">Đăng nhập ngay</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

@@ -2,59 +2,100 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): View
+    // Hiển thị trang profile
+    public function show()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        return view('profile.profile');
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    // Hiển thị form chỉnh sửa
+    public function edit()
     {
-        $request->user()->fill($request->validated());
+        $user = Auth::user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để tiếp tục.');
         }
 
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return view('profile.edit', [
+            'user' => $user
+        ]);
     }
 
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
+    // Xử lý cập nhật profile
+    public function update(Request $request)
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,'.$user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
         ]);
 
-        $user = $request->user();
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        Auth::logout();
+        $user->name = $request->name;
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->save();
 
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return redirect()->route('profile.show')
+            ->with('success', 'Cập nhật thông tin thành công!');
     }
+
+    public function updatePassword(Request $request)
+{
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
+
+    // Validate dữ liệu
+    $validator = Validator::make($request->all(), [
+        'current_password' => [
+            'required',
+            function ($attribute, $value, $fail) use ($user) {
+                if (!Hash::check($value, $user->password)) {
+                    $fail('Mật khẩu hiện tại không đúng');
+                }
+            }
+        ],
+        'new_password' => 'required|min:8|different:current_password',
+        'new_password_confirmation' => 'required|same:new_password',
+    ], [
+        'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại',
+        'new_password.required' => 'Vui lòng nhập mật khẩu mới',
+        'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự',
+        'new_password.different' => 'Mật khẩu mới phải khác mật khẩu hiện tại',
+        'new_password_confirmation.required' => 'Vui lòng xác nhận mật khẩu mới',
+        'new_password_confirmation.same' => 'Xác nhận mật khẩu không khớp',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    // Cập nhật mật khẩu mới
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    // Đăng xuất sau khi đổi mật khẩu
+    Auth::logout();
+
+    return redirect()->route('login')
+        ->with('success', 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.');
+}
 }

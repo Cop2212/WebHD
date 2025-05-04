@@ -1,38 +1,62 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\{
+    ProfileController,
+    HomeController,
+    QuestionController,
+    Auth\LoginController,
+    Auth\RegisterController,
+    Auth\PasswordResetController,
+    Auth\EmailVerificationController
+};
 
-// Trang chính - hiển thị cho tất cả người dùng
-Route::get('/', function () {
-    return view('welcome'); // Trỏ đến view guest.blade.php
-})->name('home');
+// Trang chủ
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Dashboard - chỉ cho người đã đăng nhập
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
+// Authentication Routes
 Route::middleware('guest')->group(function () {
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-                ->name('login');
+    Route::controller(LoginController::class)->group(function () {
+        Route::get('login', 'showLoginForm')->name('login');
+        Route::post('login', 'login');
+    });
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::controller(RegisterController::class)->group(function () {
+        Route::get('register', 'showRegistrationForm')->name('register');
+        Route::post('register', 'register');
+    });
 
-    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::controller(PasswordResetController::class)->group(function () {
+        Route::get('forgot-password', 'showLinkRequestForm')->name('password.request');
+        Route::post('forgot-password', 'sendResetLinkEmail')->name('password.email');
+        Route::get('reset-password/{token}', 'showResetForm')->name('password.reset');
+        Route::post('reset-password', 'reset')->name('password.update');
+    });
 });
 
-// Các route yêu cầu auth
+// Email Verification
 Route::middleware('auth')->group(function () {
+    Route::get('/user', function () {
+        return view('user'); // Sẽ sử dụng layout user.blade.php
+    })->name('user');
 
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-                ->name('logout');
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    // ... các route profile khác
+    Route::controller(EmailVerificationController::class)->group(function () {
+        Route::get('email/verify', 'notice')->name('verification.notice');
+        Route::get('email/verify/{id}/{hash}', 'verify')
+            ->middleware('signed')
+            ->name('verification.verify');
+        Route::post('email/verification-notification', 'resend')
+            ->name('verification.send');
+    });
+
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 });
 
-require __DIR__.'/auth.php';
+// Questions Resource (with custom index)
+Route::resource('questions', QuestionController::class)->except(['index']);
+Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');

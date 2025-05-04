@@ -2,112 +2,68 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller; // Thay đổi từ AuthController sang Controller
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use App\Providers\RouteServiceProvider;
 
-class RegisterController extends Controller
+class RegisterController extends Controller // Đã sửa ở đây
 {
-    use RegistersUsers;
-
-    protected function registered(Request $request, $user)
-{
-    // Đăng xuất user ngay sau khi đăng ký
-    Auth::logout();
-
-    // Chuyển hướng đến trang login với thông báo
-    return redirect('/login')->with('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
-}
-
-    public function __construct()
+    /**
+     * Hiển thị form đăng ký
+     */
+    public function showRegistrationForm()
     {
-        $this->middleware('guest');
+        return view('auth.register');
     }
 
-    protected function validator(array $data)
+    /**
+     * Xử lý đăng ký
+     */
+    public function register(Request $request)
     {
-        Log::debug('Dữ liệu validator nhận được:', $data);
-
-        $validator = Validator::make($data, [
-            'username' => ['required', 'string', 'max:50', 'unique:users'],
-            'name' => ['required', 'string', 'max:100'],
+        // Validate dữ liệu
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'unique:users', 'alpha_dash'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
+        ], [
+            'name.required' => 'Vui lòng nhập họ và tên',
+            'username.required' => 'Vui lòng nhập tên đăng nhập',
+            'username.unique' => 'Tên đăng nhập đã tồn tại',
+            'email.required' => 'Vui lòng nhập email',
+            'email.unique' => 'Email đã được sử dụng',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp',
+            'terms.accepted' => 'Bạn cần đồng ý với điều khoản sử dụng',
         ]);
 
         if ($validator->fails()) {
-            Log::error('Lỗi validation:', $validator->errors()->toArray());
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        return $validator;
-    }
+        // Tạo user mới
+        $user = User::create([
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
-    protected function create(array $data)
-    {
-        Log::debug('Dữ liệu trước khi tạo user:', $data);
+        // Gửi email xác thực
+        $user->sendEmailVerificationNotification();
 
-        try {
-            $user = User::create([
-                'username' => $data['username'],
-                'email' => $data['email'],
-                'display_name' => $data['name'],
-                'password' => Hash::make($data['password']),
-                'is_active' => true,
-            ]);
+        // Đăng nhập tự động sau khi đăng ký
+        Auth::login($user);
 
-            Log::debug('User đã được tạo:', $user->toArray());
-            return $user;
-
-        } catch (\Exception $e) {
-            Log::error('Lỗi khi tạo user: ' . $e->getMessage());
-            Log::error('Trace: ' . $e->getTraceAsString());
-            throw $e;
-        }
-    }
-
-    public function register(Request $request)
-    {
-        Log::info('Bắt đầu quá trình đăng ký');
-        Log::debug('Dữ liệu request:', $request->all());
-
-        try {
-            // Validate
-            $validator = $this->validator($request->all());
-            if ($validator->fails()) {
-                Log::error('Validation failed', $validator->errors()->toArray());
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            // Create user
-            Log::info('Tạo user mới');
-            $user = $this->create($request->all());
-
-            // Fire event
-            event(new Registered($user));
-            Log::info('Event Registered đã được kích hoạt');
-
-            // Login
-            Auth::login($user);
-            Log::info('User đã được login', ['user_id' => $user->id]);
-
-            return $this->registered($request, $user)
-                ?: redirect($this->redirectPath());
-
-        } catch (\Exception $e) {
-            Log::error('Lỗi trong quá trình đăng ký: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-
-            return back()->with('error', 'Đã xảy ra lỗi trong quá trình đăng ký: ' . $e->getMessage())
-                        ->withInput();
-        }
+        return redirect(RouteServiceProvider::HOME)
+            ->with('success', 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
     }
 }
