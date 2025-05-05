@@ -2,22 +2,29 @@
 
 namespace Database\Factories;
 
-use App\Models\Question;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class QuestionFactory extends Factory
 {
-    protected $model = Question::class;
-
     public function definition()
     {
         return [
-            'title' => $this->faker->sentence(),
-            'body' => $this->faker->paragraphs(3, true),
-            'user_id' => User::factory(),
-            'views' => $this->faker->numberBetween(0, 1000),
-            'votes_count' => $this->faker->numberBetween(0, 50)
+            'title' => rtrim($this->faker->sentence(rand(5, 10)), '.'),
+            'body' => $this->faker->paragraphs(rand(3, 7), true),
+            'user_id' => User::inRandomOrder()->first()->id ?? User::factory(),
+            'view_count' => $this->faker->numberBetween(0, 10000),
+            'vote_count' => $this->faker->numberBetween(-10, 100),
+            'answer_count' => $this->faker->numberBetween(0, 20),
+            'is_answered' => $this->faker->boolean(30), // 30% cơ hội là true
+            'is_closed' => $this->faker->boolean(10), // 10% cơ hội là true
+            'closed_at' => $this->faker->optional(0.1)->dateTimeBetween('-1 year', 'now'), // 10% có giá trị
+            'closed_reason' => $this->faker->optional(0.1)->randomElement([
+                'Duplicate question',
+                'Off-topic',
+                'Too broad',
+                'Opinion-based'
+            ]),
         ];
     }
 }

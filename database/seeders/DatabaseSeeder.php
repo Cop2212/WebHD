@@ -14,10 +14,10 @@ class DatabaseSeeder extends Seeder
         // Tạo admin account
         User::create([
             'name' => 'Admin',
+            'username' => 'admin', // Thêm dòng này
             'email' => 'admin@example.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('password'),
             'reputation' => 1000,
-            'email_verified_at' => now()
         ]);
 
         // Tạo 10 user thường

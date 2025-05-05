@@ -8,7 +8,8 @@ use App\Http\Controllers\{
     Auth\LoginController,
     Auth\RegisterController,
     Auth\PasswordResetController,
-    Auth\EmailVerificationController
+    Auth\EmailVerificationController,
+    TagController
 };
 
 // Trang chủ
@@ -34,17 +35,17 @@ Route::middleware('guest')->group(function () {
     });
 });
 
-// Email Verification
+// Authenticated Routes
 Route::middleware('auth')->group(function () {
-    Route::get('/user', function () {
-        return view('user'); // Sẽ sử dụng layout user.blade.php
-    })->name('user');
+    // Profile routes
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'show'])->name('profile.show');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/update', [ProfileController::class, 'update'])->name('profile.update');
+        Route::patch('/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+    });
 
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
-
+    // Email Verification
     Route::controller(EmailVerificationController::class)->group(function () {
         Route::get('email/verify', 'notice')->name('verification.notice');
         Route::get('email/verify/{id}/{hash}', 'verify')
@@ -54,9 +55,30 @@ Route::middleware('auth')->group(function () {
             ->name('verification.send');
     });
 
+    // Questions Management (create/edit/delete)
+    Route::resource('questions', QuestionController::class)
+        ->except(['index', 'show'])
+        ->names([
+            'create' => 'questions.create',
+            'store' => 'questions.store',
+            'edit' => 'questions.edit',
+            'update' => 'questions.update',
+            'destroy' => 'questions.destroy'
+        ]);
+
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 });
 
-// Questions Resource (with custom index)
-Route::resource('questions', QuestionController::class)->except(['index']);
-Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');
+// Public Questions Routes
+Route::controller(QuestionController::class)->group(function () {
+    Route::get('/questions', 'index')->name('questions.index');
+    Route::get('/questions/filter', 'filter')->name('questions.filter'); // Thêm route filter
+    Route::get('/questions/{question}', 'show')->name('questions.show');
+    Route::get('/questions/tagged/{tag:slug}', 'questionsByTag')->name('questions.by-tag'); // Route mới cho tag cụ thể
+});
+
+// Tags Routes (public)
+Route::controller(TagController::class)->group(function () {
+    Route::get('/tags', 'index')->name('tags.index');
+    Route::get('/tags/{tag:slug}', 'show')->name('tags.show');
+});

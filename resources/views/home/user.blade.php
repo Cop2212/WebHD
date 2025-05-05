@@ -11,24 +11,6 @@
                 <h1>Xin chào, {{ Auth::user()->name }}</h1>
                 <p class="welcome-message">Chúc bạn một ngày tốt lành!</p>
             </div>
-
-            <div class="user-actions">
-                <div class="dropdown user-dropdown">
-                    <button class="btn btn-account dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-1"></i> Tài khoản
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item logout-item">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </div>
 
         <div class="dashboard-actions">
@@ -38,17 +20,23 @@
             </a>
         </div>
 
+        <!-- Danh sách câu hỏi -->
         @if($questions->isNotEmpty())
-            <div class="question-list">
+            <div class="question-list mt-4">
                 @foreach($questions as $question)
-                    @include('partials.question-card', ['question' => $question])
+                    @include('questions.question-card', ['question' => $question])
                 @endforeach
-                {{ $questions->links() }}
+
+                <!-- Phân trang -->
+                <div class="d-flex justify-content-center mt-4">
+                    {{ $questions->links() }}
+                </div>
             </div>
         @else
-            <div class="empty-state">
-                <i class="fas fa-question-circle"></i>
-                <p>Chưa có câu hỏi nào</p>
+            <div class="empty-state text-center py-5">
+                <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+                <h4 class="mb-3">Chưa có câu hỏi nào</h4>
+                <p class="text-muted mb-4">Hãy là người đầu tiên đặt câu hỏi!</p>
                 <a href="{{ route('questions.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-1"></i> Tạo câu hỏi đầu tiên
                 </a>

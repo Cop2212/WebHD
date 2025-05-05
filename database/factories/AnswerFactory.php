@@ -11,14 +11,15 @@ class AnswerFactory extends Factory
 {
     protected $model = Answer::class;
 
-    public function definition()
+    // database/factories/AnswerFactory.php
+public function definition()
 {
     return [
-        'body' => $this->faker->paragraphs(3, true),
         'question_id' => Question::factory(),
         'user_id' => User::factory(),
-        'is_accepted' => false,
-        'votes_count' => 0
+        'body' => $this->faker->paragraphs(rand(1, 5), true),
+        'is_accepted' => $this->faker->boolean(20),
+        'vote_count' => $this->faker->numberBetween(-5, 50),
     ];
 }
 }

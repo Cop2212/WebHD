@@ -19,12 +19,23 @@
                     </div>
                 </div>
 
+                <div class="tags-cloud mb-4">
+                    <h3 class="section-title mb-3">Chủ đề phổ biến</h3>
+                    <div class="tags-container">
+                        @foreach($popularTags as $tag)
+                            <a href="{{ route('tags.show', $tag->slug) }}" class="tag-item">
+                                {{ $tag->name }}
+                                <span class="tag-count">{{ $tag->questions_count }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
                 <div class="popular-questions">
-                    <h2 class="section-title">Câu hỏi nổi bật</h2>
                     @if($popularQuestions->isNotEmpty())
                         <div class="question-grid">
                             @foreach($popularQuestions as $question)
-                                @include('partials.question-card', ['question' => $question])
+                                @include('questions.question-card', ['question' => $question])
                             @endforeach
                         </div>
                     @else

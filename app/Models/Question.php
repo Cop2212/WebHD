@@ -12,27 +12,51 @@ class Question extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'title', 'body', 'views'];
+    protected $fillable = [
+        'title', 'body', 'user_id', 'view_count',
+        'vote_count', 'answer_count', 'is_answered',
+        'is_closed', 'closed_at', 'closed_reason'
+    ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // app/Models/Question.php
-public function answers()
-{
-    return $this->hasMany(Answer::class);
-}
-
-public function acceptedAnswer()
-{
-    return $this->hasOne(Answer::class)->where('is_accepted', true);
-}
-
-public function tags()
+    public function answers(): HasMany
     {
-        return $this->belongsToMany(Tag::class, 'question_tag'); // hoặc 'question_tag' là tên pivot table
+        return $this->hasMany(Answer::class);
     }
 
+    public function acceptedAnswer()
+    {
+        return $this->hasOne(Answer::class)->where('is_accepted', true);
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'question_tag');
+    }
+
+    // Thêm relationship votes
+    public function votes(): HasMany
+    {
+        return $this->hasMany(QuestionVote::class); // Giả sử bạn có model QuestionVote
+    }
+
+    // Hoặc nếu bạn dùng polymorphic relationship
+    /*
+    public function votes(): MorphMany
+    {
+        return $this->morphMany(Vote::class, 'votable');
+    }
+    */
+
+    // Thêm scope để tìm kiếm theo nhiều tag
+    public function scopeWithAllTags($query, array $tagIds)
+    {
+        return $query->whereHas('tags', function($query) use ($tagIds) {
+            $query->whereIn('tags.id', $tagIds);
+        }, '=', count($tagIds));
+    }
 }
