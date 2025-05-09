@@ -8,81 +8,82 @@ use Illuminate\Http\Request;
 class QuestionController extends Controller
 {
     public function index(Request $request)
-{
-    $selectedTagIds = (array)$request->input('tags', []);
-
-    $query = Question::with(['user', 'tags', 'answers'])
-        ->withCount(['answers', 'votes'])
-        ->latest();
-
-    // Lọc theo nhiều tag (AND condition)
-    if (!empty($selectedTagIds)) {
-        $query->whereHas('tags', function($q) use ($selectedTagIds) {
-            $q->whereIn('id', $selectedTagIds);
-        }, '=', count($selectedTagIds)); // Quan trọng: thêm điều kiện count
-    }
-
-    $questions = $query->paginate(15);
-    $allTags = Tag::withCount('questions')->orderBy('name')->get();
-    $popularTags = Tag::withCount('questions')->orderByDesc('questions_count')->limit(20)->get();
-
-    return view('questions.index', [
-        'questions' => $questions,
-        'allTags' => $allTags,
-        'popularTags' => $popularTags,
-        'selectedTags' => Tag::whereIn('id', $selectedTagIds)->get()
-    ]);
-}
-
-    public function filter(Request $request)
     {
-        $tagIds = (array)$request->input('tags', []);
-
-        $questions = Question::with(['user', 'tags', 'answers'])
-            ->when(!empty($tagIds), function($query) use ($tagIds) {
-                $query->whereHas('tags', function($q) use ($tagIds) {
-                    $q->whereIn('id', $tagIds);
-                });
-            })
-            ->withCount('answers')
-            ->latest()
-            ->paginate(15);
-
-        return response()->json([
-            'html' => view('questions._questions_list', compact('questions'))->render()
-        ]);
-    }
-
-    public function questionsByTag(Tag $tag)
-    {
-        $questions = Question::with(['user', 'tags', 'answers'])
-            ->whereHas('tags', function($q) use ($tag) {
-                $q->where('id', $tag->id);
-            })
-            ->withCount('answers')
-            ->latest()
-            ->paginate(15);
-
+        $questions = $this->buildQuestionQuery($request)->paginate(15);
         $allTags = Tag::withCount('questions')->orderBy('name')->get();
-        $popularTags = Tag::withCount('questions')->orderByDesc('questions_count')->limit(20)->get();
 
         return view('questions.index', [
             'questions' => $questions,
             'allTags' => $allTags,
-            'popularTags' => $popularTags,
-            'tag' => $tag
+            'popularTags' => Tag::popular()->limit(20)->get(),
+            'selectedTags' => collect(),
+            'mainTag' => null
         ]);
     }
 
     public function show(Question $question)
+{
+    // Load đầy đủ quan hệ và counts
+    $question->load(['user', 'tags', 'answers'])
+    ->loadCount(['answers', 'votes', 'views']);
+
+
+    return view('questions.show', compact('question'));
+}
+
+    public function showByTag(Request $request, Tag $tag)
     {
-        $question->load(['user', 'tags', 'answers.user'])
-            ->loadCount(['answers', 'votes']);
+        $questions = $this->buildQuestionQuery($request, $tag)->paginate(15);
+        $allTags = Tag::withCount('questions')->orderBy('name')->get();
 
-        // Tăng view count
-        $question->increment('views');
+        return view('questions.index', [
+            'questions' => $questions,
+            'mainTag' => $tag,
+            'selectedTags' => $this->getSelectedTags($request, $tag),
+            'allTags' => $allTags,
+            'popularTags' => Tag::popular()->limit(20)->get()
+        ]);
+    }
 
-        return view('questions.show', compact('question'));
+    public function filter(Request $request)
+    {
+        $questions = $this->buildQuestionQuery($request)->paginate(15);
+
+        return response()->json([
+            'html' => view('questions.partials.list', compact('questions'))->render()
+        ]);
+    }
+
+    protected function buildQuestionQuery(Request $request, Tag $mainTag = null)
+{
+    $selectedTags = $this->getSelectedTags($request, $mainTag);
+
+    return Question::with([
+            'user',
+            'tags',
+            'answers' => fn($q) => $q->latest()->limit(3) // nếu muốn giới hạn số câu trả lời load
+        ])
+        ->when($selectedTags->isNotEmpty(), function ($query) use ($selectedTags) {
+            $tagIds = $selectedTags->pluck('id');
+            $query->whereHas('tags', function ($q) use ($tagIds) {
+                $q->whereIn('id', $tagIds);
+            }, '=', count($tagIds));
+        })
+        ->withCount(['answers', 'votes', 'views']) // quan trọng
+        ->latest();
+}
+
+    protected function getSelectedTags(Request $request, Tag $mainTag = null)
+    {
+        $selectedTags = $mainTag ? collect([$mainTag]) : collect();
+
+        if ($request->filled('tags')) {
+            $tagIds = explode(',', $request->tags);
+            $additionalTags = Tag::whereIn('id', $tagIds)->get();
+            $selectedTags = $selectedTags->merge($additionalTags);
+        }
+
+        return $selectedTags;
     }
 
     // Các method khác cho create, store, edit, update, destroy...
