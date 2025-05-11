@@ -10,7 +10,8 @@ use App\Http\Controllers\{
     Auth\PasswordResetController,
     Auth\EmailVerificationController,
     TagController,
-    UserController
+    UserController,
+    AdminController,
 };
 
 // Public Routes
@@ -53,6 +54,15 @@ Route::middleware(['web'])->group(function () {
 
 // Authenticated Routes
 Route::middleware(['auth', 'web'])->group(function () {
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/questions', [AdminController::class, 'questions'])->name('admin.questions');
+    Route::get('/tags', [AdminController::class, 'tags'])->name('admin.tags');
+    Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+});
+
+
+
     // Profile routes
     Route::prefix('profile')->controller(ProfileController::class)->group(function () {
         Route::get('/', 'show')->name('profile.show');

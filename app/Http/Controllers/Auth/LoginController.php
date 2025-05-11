@@ -43,7 +43,14 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+
+    if ($user->is_admin) {
         return redirect()->intended(RouteServiceProvider::HOME)
+        ->with('success', 'Đăng nhập thành công với quyền quản trị!');
+    }
+
+    return redirect()->intended(RouteServiceProvider::HOME)
             ->with('success', 'Đăng nhập thành công!');
     }
 
