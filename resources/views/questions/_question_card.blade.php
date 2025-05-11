@@ -11,11 +11,17 @@
             <div class="flex-grow-1">
                 <!-- Sử dụng $question->title và $question->id (trong route) -->
                 <h5 class="card-title">
-                    <a href="{{ route('questions.show', $question) }}">{{ $question->title }}</a>
+                    <a href="{{ Auth::check() ? route('questions.show', $question) : route('login') }}">
+    {{ $question->title }}
+</a>
+
                 </h5>
 
                 <!-- Sử dụng $question->body -->
-                <p class="card-text text-muted">{{ Str::limit($question->body, 200) }}</p>
+                <p class="card-text text-muted" style="word-break: break-word;">
+    {{ Str::limit($question->body, 200) }}
+</p>
+
 
                 <!-- Tags - Sử dụng $question->tags và $tag->slug, $tag->name -->
                 <div class="tags mb-2">

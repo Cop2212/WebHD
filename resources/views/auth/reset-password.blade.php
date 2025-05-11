@@ -1,39 +1,63 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
-        @csrf
+@extends('layouts.auth')
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+@section('title', 'Đặt lại mật khẩu')
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+@section('content')
+<div class="auth-container">
+    <div class="card auth-card">
+        <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <i class="fas fa-key fa-3x text-danger mb-3"></i>
+                <h4>Đặt lại mật khẩu</h4>
+                <p class="text-muted">Nhập mật khẩu mới cho tài khoản của bạn.</p>
+            </div>
+
+            <form method="POST" action="{{ route('password.update') }}">
+                @csrf
+
+                <!-- Token ẩn -->
+                <input type="hidden" name="token" value="{{ $token }}">
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input id="email" type="email"
+       class="form-control @error('email') is-invalid @enderror"
+       name="email" value="{{ old('email', $email) }}" required autofocus>
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Mật khẩu mới -->
+                <div class="mb-3">
+                    <label for="password" class="form-label">Mật khẩu mới</label>
+                    <input id="password" type="password"
+                           class="form-control @error('password') is-invalid @enderror"
+                           name="password" required>
+                    @error('password')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Nhập lại mật khẩu -->
+                <div class="mb-3">
+                    <label for="password_confirmation" class="form-label">Xác nhận mật khẩu</label>
+                    <input id="password_confirmation" type="password"
+                           class="form-control" name="password_confirmation" required>
+                </div>
+
+                <button type="submit" class="btn btn-danger w-100">
+                    <i class="fas fa-check me-2"></i> Cập nhật mật khẩu
+                </button>
+
+                <div class="text-center mt-3">
+                    <a href="{{ route('login') }}" class="text-muted">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại đăng nhập
+                    </a>
+                </div>
+            </form>
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+    </div>
+</div>
+@endsection

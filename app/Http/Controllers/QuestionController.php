@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\{Question, Tag, User, Answer};
 use Illuminate\Http\Request;
 
+
 class QuestionController extends Controller
 {
     public function index(Request $request)
@@ -25,7 +26,7 @@ class QuestionController extends Controller
 {
     // Load đầy đủ quan hệ và counts
     $question->load(['user', 'tags', 'answers'])
-    ->loadCount(['answers', 'votes', 'views']);
+    ->loadCount(['answers', 'votes']);
 
 
     return view('questions.show', compact('question'));
@@ -58,33 +59,73 @@ class QuestionController extends Controller
 {
     $selectedTags = $this->getSelectedTags($request, $mainTag);
 
-    return Question::with([
+    $query = Question::with([
             'user',
             'tags',
-            'answers' => fn($q) => $q->latest()->limit(3) // nếu muốn giới hạn số câu trả lời load
+            'answers' => fn($q) => $q->latest()->limit(3)
         ])
-        ->when($selectedTags->isNotEmpty(), function ($query) use ($selectedTags) {
-            $tagIds = $selectedTags->pluck('id');
-            $query->whereHas('tags', function ($q) use ($tagIds) {
-                $q->whereIn('id', $tagIds);
-            }, '=', count($tagIds));
-        })
-        ->withCount(['answers', 'votes', 'views']) // quan trọng
-        ->latest();
+        ->withCount(['answers', 'votes', 'views']);
+
+    if ($selectedTags->isNotEmpty()) {
+        $tagIds = $selectedTags->pluck('id')->toArray();
+        $query->whereHas('tags', function($q) use ($tagIds) {
+            $q->whereIn('id', $tagIds);
+        }, '=', count($tagIds));
+    }
+
+    return $query->latest();
 }
 
     protected function getSelectedTags(Request $request, Tag $mainTag = null)
-    {
-        $selectedTags = $mainTag ? collect([$mainTag]) : collect();
+{
+    // Khởi tạo collection rỗng
+    $selectedTags = collect();
 
-        if ($request->filled('tags')) {
-            $tagIds = explode(',', $request->tags);
-            $additionalTags = Tag::whereIn('id', $tagIds)->get();
-            $selectedTags = $selectedTags->merge($additionalTags);
-        }
-
-        return $selectedTags;
+    // Thêm mainTag nếu tồn tại
+    if ($mainTag) {
+        $selectedTags->push($mainTag);
     }
+
+    // Thêm các tag từ request nếu có
+    if ($request->filled('tags')) {
+        $tagIds = explode(',', $request->tags);
+        $additionalTags = Tag::whereIn('id', $tagIds)->get();
+        $selectedTags = $selectedTags->merge($additionalTags);
+    }
+
+    return $selectedTags;
+}
+
+    public function create()
+{
+    $allTags = \App\Models\Tag::all(); // Sử dụng đúng tên $allTags như trong view
+    return view('questions.create', compact('allTags'));
+}
+
+public function store(Request $request)
+{
+    // Xác thực dữ liệu từ request
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'body' => 'required|string',
+        'tags' => 'required|array|min:1',
+        'tags.*' => 'exists:tags,id',
+    ]);
+
+    // Tạo câu hỏi mới
+    $question = new Question();
+    $question->title = $validated['title'];
+    $question->body = $validated['body'];
+    $question->user_id = auth()->id(); // Gắn ID người dùng hiện tại
+    $question->save();
+
+    // Gắn tag cho câu hỏi (sử dụng bảng trung gian question_tag)
+    $question->tags()->sync($validated['tags']);
+
+    // Chuyển hướng về trang chủ của người dùng (hoặc dashboard)
+    return redirect()->route('home')->with('success', 'Đã đăng câu hỏi thành công!');
+}
+
 
     // Các method khác cho create, store, edit, update, destroy...
 }

@@ -9,7 +9,8 @@ use App\Http\Controllers\{
     Auth\RegisterController,
     Auth\PasswordResetController,
     Auth\EmailVerificationController,
-    TagController
+    TagController,
+    UserController
 };
 
 // Public Routes
@@ -40,6 +41,7 @@ Route::middleware(['web'])->group(function () {
     // Questions Routes (public)
     Route::controller(QuestionController::class)->group(function () {
         Route::get('/questions', 'index')->name('questions.index');
+        Route::get('/questions/create', 'create')->name('questions.create');
         Route::get('/questions/{question}', 'show')->name('questions.show');
     });
 
@@ -68,6 +70,8 @@ Route::middleware(['auth', 'web'])->group(function () {
         Route::post('email/verification-notification', 'resend')
             ->name('verification.send');
     });
+
+    Route::post('/send-email-verification', [UserController::class, 'sendEmailVerification']);
 
     // Questions Management (create/edit/delete)
     Route::resource('questions', QuestionController::class)

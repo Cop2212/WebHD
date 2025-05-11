@@ -55,10 +55,12 @@ class RegisterController extends Controller // Đã sửa ở đây
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+
+        'email_verified_at' => now(), // Đảm bảo chưa xác thực
         ]);
 
         // Gửi email xác thực
-        $user->sendEmailVerificationNotification();
+        //$user->sendEmailVerificationNotification();
 
         // Đăng nhập tự động sau khi đăng ký
         Auth::login($user);

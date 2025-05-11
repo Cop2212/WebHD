@@ -7,30 +7,20 @@ use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    // Trong HomeController
-public function index()
-{
-    // Đảm bảo sử dụng paginate() thay vì get() nếu cần phân trang
-    $popularQuestions = Question::with(['user', 'tags', 'answers'])
-        ->withCount(['answers', 'votes'])
-        ->orderBy('answers_count', 'desc')
-        ->take(5)
-        ->get(); // Không phân trang nên không dùng withQueryString
+    public function index()
+    {
+        $stats = $this->getSystemStats();
 
-    $questions = Question::with(['user', 'tags', 'answers'])
-        ->withCount(['answers', 'votes'])
-        ->latest()
-        ->paginate(10); // Có phân trang nên có thể dùng withQueryString
+        if (Auth::check()) {
+            // Người dùng đã đăng nhập - hiển thị trang user.blade.php
+            return $this->authenticatedHome($stats);
+        } else {
+            // Người dùng chưa đăng nhập - hiển thị trang guest
+            return $this->guestHome($stats);
+        }
+    }
 
-    $popularTags = Tag::withCount('questions')
-        ->orderBy('questions_count', 'desc')
-        ->take(10)
-        ->get();
-
-    return view('home.guest', compact('popularQuestions', 'questions', 'popularTags'));
-}
-
-protected function getSystemStats()
+    protected function getSystemStats()
     {
         return [
             'totalUsers' => User::count(),
@@ -41,20 +31,58 @@ protected function getSystemStats()
     }
 
     protected function authenticatedHome(array $stats)
-    {
-        $questions = Question::with(['user', 'tags'])
-            ->withCount('answers')
-            ->latest()
-            ->paginate(10);
+{
+    $user = Auth::user();
 
-        return view('home.dashboard', array_merge(compact('questions'), $stats));
-    }
+    $userQuestions = Question::where('user_id', $user->id)
+        ->with(['tags', 'answers'])
+        ->withCount(['answers', 'votes'])
+        ->latest()
+        ->paginate(10);
+
+    // Lọc theo tag nếu có
+    $selectedTagIds = request()->input('tags')
+        ? explode(',', request()->input('tags'))
+        : [];
+
+    $questions = Question::with(['user', 'tags'])
+    ->withCount('answers')
+    ->when(!empty($selectedTagIds), function ($query) use ($selectedTagIds) {
+        // Join bảng trung gian và đếm số lượng tag khớp với câu hỏi
+        $query->whereHas('tags', function ($q) use ($selectedTagIds) {
+            $q->whereIn('tags.id', $selectedTagIds);
+        }, '=', count($selectedTagIds));
+    })
+    ->latest()
+    ->paginate(10);
+
+
+    // Lấy tất cả tag
+    $allTags = Tag::withCount('questions')->get();
+
+    // Lấy tag đã chọn
+    $selectedTags = Tag::whereIn('id', $selectedTagIds)->get();
+
+    return view('home.user', array_merge(
+        compact('user', 'userQuestions', 'questions', 'allTags', 'selectedTags'),
+        $stats
+    ));
+}
+
 
     protected function guestHome(array $stats)
     {
-        return view('home.welcome', array_merge([
-            'popularQuestions' => Question::popular()->limit(5)->get(),
-            'popularTags' => Tag::popular()->limit(10)->get()
-        ], $stats));
+        $popularQuestions = Question::with(['user', 'tags', 'answers'])
+            ->withCount(['answers', 'votes'])
+            ->orderBy('answers_count', 'desc')
+            ->take(5)
+            ->get();
+
+        $popularTags = Tag::withCount('questions')
+            ->orderBy('questions_count', 'desc')
+            ->take(10)
+            ->get();
+
+        return view('home.guest', array_merge(compact('popularQuestions', 'popularTags'), $stats));
     }
 }

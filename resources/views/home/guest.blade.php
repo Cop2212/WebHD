@@ -52,26 +52,7 @@
                         </div>
                     </div>
 
-                    <!-- Popular Tags -->
-                    <div class="col-lg-4">
-                        <div class="tags-cloud card border-0 shadow-sm rounded-4 p-4 h-100">
-                            <h2 class="section-title mb-4">
-                                <i class="fas fa-tags text-success me-2"></i>
-                                Chủ đề phổ biến
-                            </h2>
-                            <div class="tags-container d-flex flex-wrap gap-2">
-                                @foreach($popularTags as $tag)
-                                    <a href="{{ route('tags.show', $tag->slug) }}"
-                                       class="tag-item btn btn-sm btn-outline-success position-relative">
-                                        {{ $tag->name }}
-                                        <span class="tag-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
-                                            {{ $tag->questions_count }}
-                                        </span>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>

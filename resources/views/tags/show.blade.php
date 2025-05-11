@@ -58,9 +58,16 @@
         <div class="questions-section">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Câu hỏi với tag "{{ $tag->name }}"</h2>
-                <a href="{{ route('questions.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i> Đặt câu hỏi
-                </a>
+                @if(Auth::check())
+    <a href="{{ route('questions.create') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Đặt câu hỏi
+    </a>
+@else
+    <a href="{{ route('login') }}" class="btn btn-primary">
+        <i class="fas fa-sign-in-alt me-1"></i> Đặt câu hỏi
+    </a>
+@endif
+
             </div>
 
             @include('questions._question_list', ['questions' => $questions])

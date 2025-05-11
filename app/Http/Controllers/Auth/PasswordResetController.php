@@ -39,11 +39,12 @@ class PasswordResetController extends Controller
      * Hiển thị form reset mật khẩu
      */
     public function showResetForm(Request $request, $token = null)
-    {
-        return view('auth.reset-password')->with(
-            ['token' => $token, 'email' => $request->email]
-        );
-    }
+{
+    return view('auth.reset-password', [
+        'token' => $token,
+        'email' => $request->email, // truyền email từ URL query string
+    ]);
+}
 
     /**
      * Xử lý reset mật khẩu

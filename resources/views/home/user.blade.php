@@ -50,6 +50,12 @@
             </div>
         </div>
 
+        <div class="mb-4 d-flex justify-content-end">
+    <a href="{{ route('questions.create') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Đặt câu hỏi
+    </a>
+</div>
+
         <!-- Questions Section -->
         @if($questions->isNotEmpty())
             @include('questions._question_list', ['questions' => $questions])
