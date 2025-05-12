@@ -10,8 +10,10 @@ class QuestionVote extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['question_id', 'user_id', 'vote'];
-
+    protected $fillable = ['question_id', 'user_id'];
+protected $casts = [
+    'vote' => 'integer'
+];
     /**
      * @return BelongsTo<Question, QuestionVote>
      */

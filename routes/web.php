@@ -44,6 +44,9 @@ Route::middleware(['web'])->group(function () {
         Route::get('/questions', 'index')->name('questions.index');
         Route::get('/questions/create', 'create')->name('questions.create');
         Route::get('/questions/{question}', 'show')->name('questions.show');
+
+        // Thêm route vote nhưng chỉ cho authenticated users
+    Route::middleware('auth')->post('/questions/{question}/vote', 'vote')->name('questions.vote');
     });
 
     // Tags Routes (public)
@@ -59,6 +62,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/questions', [AdminController::class, 'questions'])->name('admin.questions');
     Route::get('/tags', [AdminController::class, 'tags'])->name('admin.tags');
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+
+    Route::delete('questions/{id}', [AdminController::class, 'destroyQuestion'])->name('admin.questions.delete');
+    Route::delete('tags/{id}', [AdminController::class, 'destroyTag'])->name('admin.tags.delete');
+    Route::delete('users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.delete');
 });
 
 
@@ -85,7 +92,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     // Questions Management (create/edit/delete)
     Route::resource('questions', QuestionController::class)
-        ->except(['index', 'show'])
+        ->except(['index', 'show', 'create'])
         ->names([
             'create' => 'questions.create',
             'store' => 'questions.store',

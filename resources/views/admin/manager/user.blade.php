@@ -8,6 +8,7 @@
                     <th>Tên</th>
                     <th>Email</th>
                     <th>Đăng ký lúc</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -17,6 +18,14 @@
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>{{ $user->created_at->format('d/m/Y') }}</td>
+                        <td>
+                            <!-- Nút xóa người dùng -->
+                            <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display:inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                            </form>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

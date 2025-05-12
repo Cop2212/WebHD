@@ -41,6 +41,12 @@ class Question extends Model
         return $this->belongsToMany(Tag::class, 'question_tag');
     }
 
+    public function isVotedByUser($userId = null)
+{
+    $userId = $userId ?? auth()->id();
+    return $this->votes()->where('user_id', $userId)->exists();
+}
+
     // Thêm relationship votes
     public function votes(): HasMany
     {

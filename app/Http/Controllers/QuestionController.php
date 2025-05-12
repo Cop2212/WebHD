@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Question, Tag, User, Answer};
+use App\Models\{Question, Tag, User, Answer, QuestionVote};
 use Illuminate\Http\Request;
 
 
@@ -31,6 +31,35 @@ class QuestionController extends Controller
 
     return view('questions.show', compact('question'));
 }
+
+// QuestionController.php
+public function vote(Question $question)
+{
+    $user = auth()->user();
+
+    // Kiểm tra user đã vote chưa
+    $existingVote = QuestionVote::where([
+        'user_id' => $user->id,
+        'question_id' => $question->id
+    ])->first();
+
+    if ($existingVote) {
+        // Nếu đã vote -> unvote
+        $existingVote->delete();
+        $question->decrement('votes_count');
+        return back()->with('success', 'Đã hủy vote!');
+    }
+
+    // Nếu chưa vote -> tạo vote mới
+    QuestionVote::create([
+        'user_id' => $user->id,
+        'question_id' => $question->id
+    ]);
+
+    $question->increment('votes_count');
+    return back()->with('success', 'Vote thành công!');
+}
+
 
     public function showByTag(Request $request, Tag $tag)
     {

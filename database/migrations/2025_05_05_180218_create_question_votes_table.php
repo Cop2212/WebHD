@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('question_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('no action');
-            $table->tinyInteger('vote'); // 1 = upvote, -1 = downvote
             $table->timestamps();
 
             $table->unique(['question_id', 'user_id']);

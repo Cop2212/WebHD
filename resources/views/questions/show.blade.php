@@ -20,7 +20,14 @@
         </div>
 
         <div class="d-flex align-items-center mt-4">
-            <span class="me-3">👍 {{ $question->votes_count }} votes</span>
+            <form action="{{ route('questions.vote', $question) }}" method="POST">
+    @csrf
+    <button type="submit" class="btn btn-sm {{ $question->isVotedByUser(auth()->id()) ? 'btn-success' : 'btn-outline-success' }}">
+        👍 {{ $question->votes_count }}
+    </button>
+</form>
+
+
             <span class="me-3">💬 {{ $question->answers_count }} câu trả lời</span>
             <span>👁️ {{ $question->views_count }} lượt xem</span>
         </div>
