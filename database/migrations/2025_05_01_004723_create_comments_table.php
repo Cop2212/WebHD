@@ -13,7 +13,7 @@ class CreateCommentsTable extends Migration
             $table->id();
             $table->text('body');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('question_id')->nullable()->constrained()->onDelete('no action');
+            $table->foreignId('question_id')->nullable()->constrained();
             $table->foreignId('answer_id')->nullable()->constrained()->onDelete('no action');
             $table->timestamps();
         });

@@ -14,7 +14,7 @@
                 <div class="card-body">
                     <form method="POST" action="{{ route('profile.update') }}">
                         @csrf
-                        @method('PUT')
+                        @method('PATCH')
 
                         <!-- Thông tin cơ bản -->
                         <div class="mb-3">

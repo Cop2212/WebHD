@@ -3,7 +3,7 @@
         <div class="d-flex">
             <!-- Phần vote - Sử dụng $question->votes_count -->
             <div class="vote-section pe-3 text-center">
-                <div class="vote-count">{{ $question->votes_count ?? 0 }}</div>
+                <div class="vote-count">{{ $question->vote_count ?? 0 }}</div>
                 <small>votes</small>
             </div>
 

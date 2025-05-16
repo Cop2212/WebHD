@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Question, Tag, User, Answer, QuestionVote};
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
@@ -22,14 +22,35 @@ class QuestionController extends Controller
         ]);
     }
 
-    public function show(Question $question)
+public function show(Question $question)
 {
-    // Load đầy đủ quan hệ và counts
-    $question->load(['user', 'tags', 'answers'])
-    ->loadCount(['answers', 'votes']);
+    $question->load([
+        'user',
+        'tags',
+        'comments' => function ($query) {
+            $query->with('user', 'votes')
+                  ->withCount([
+                      'votes as total_votes' => function ($q) {
+                          $q->select(DB::raw('coalesce(sum(value), 0)'));
+                      }
+                  ])
+                  ->orderByDesc('total_votes');
+        }
+    ])->loadCount(['answers', 'votes', 'comments']);
 
+    $key = 'question_' . $question->id . '_viewed';
+    if (!session()->has($key)) {
+        $question->increment('view_count');
+        session()->put($key, true);
+    }
 
     return view('questions.show', compact('question'));
+}
+
+public function myQuestions()
+{
+    $questions = auth()->user()->questions()->latest()->paginate(10);
+    return view('questions.mine', compact('questions'));
 }
 
 // QuestionController.php
@@ -46,7 +67,7 @@ public function vote(Question $question)
     if ($existingVote) {
         // Nếu đã vote -> unvote
         $existingVote->delete();
-        $question->decrement('votes_count');
+        $question->decrement('vote_count');
         return back()->with('success', 'Đã hủy vote!');
     }
 
@@ -56,7 +77,7 @@ public function vote(Question $question)
         'question_id' => $question->id
     ]);
 
-    $question->increment('votes_count');
+    $question->increment('vote_count');
     return back()->with('success', 'Vote thành công!');
 }
 
@@ -155,6 +176,25 @@ public function store(Request $request)
     return redirect()->route('home')->with('success', 'Đã đăng câu hỏi thành công!');
 }
 
+public function edit(Question $question)
+{
+    $this->authorize('update', $question);
+    return view('questions.edit', compact('question'));
+}
+
+public function update(Request $request, Question $question)
+{
+    $this->authorize('update', $question);
+
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'body' => 'required|string',
+    ]);
+
+    $question->update($validated);
+
+    return redirect()->route('questions.show', $question)->with('success', 'Cập nhật câu hỏi thành công.');
+}
 
     // Các method khác cho create, store, edit, update, destroy...
 }

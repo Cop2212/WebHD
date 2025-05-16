@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class PasswordResetController extends Controller
 {
@@ -58,20 +59,26 @@ class PasswordResetController extends Controller
         ]);
 
         $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
+    $request->only('email', 'password', 'password_confirmation', 'token'),
+    function ($user, $password) {
+        $user->forceFill([
+            'password' => Hash::make($password),
+            'remember_token' => Str::random(60),
+        ])->save();
 
-                $user->save();
+        event(new PasswordReset($user));
 
-                event(new PasswordReset($user));
-            }
-        );
+        // Đăng nhập user để có thể gọi logoutOtherDevices
+        Auth::login($user);
+
+        // Đăng xuất mọi phiên đăng nhập khác
+        Auth::logoutOtherDevices($password);
+    }
+);
 
         return $status == Password::PASSWORD_RESET
             ? redirect()->route('login')->with('status', __($status))
-            : back()->withErrors(['email' => [__($status)]]);
+                    : back()->withInput($request->only('email'))
+                        ->withErrors(['email' => __($status)]);
     }
 }

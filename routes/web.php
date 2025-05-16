@@ -12,6 +12,8 @@ use App\Http\Controllers\{
     TagController,
     UserController,
     AdminController,
+    CommentController,
+    CommentVoteController,
 };
 
 // Public Routes
@@ -74,6 +76,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::prefix('profile')->controller(ProfileController::class)->group(function () {
         Route::get('/', 'show')->name('profile.show');
         Route::get('/edit', 'edit')->name('profile.edit');
+        Route::get('/my-questions', [QuestionController::class, 'myQuestions'])->name('questions.mine');
+
+
         Route::patch('/update', 'update')->name('profile.update');
         Route::patch('/update-password', 'updatePassword')->name('profile.update-password');
     });
@@ -92,7 +97,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     // Questions Management (create/edit/delete)
     Route::resource('questions', QuestionController::class)
-        ->except(['index', 'show', 'create'])
+        ->except(['index', 'show'])
         ->names([
             'create' => 'questions.create',
             'store' => 'questions.store',
@@ -100,6 +105,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
             'update' => 'questions.update',
             'destroy' => 'questions.destroy'
         ]);
+
+
+    Route::post('/questions/{question}/comments', [CommentController::class, 'store'])
+    ->name('questions.comments.store')
+    ->middleware('auth');
+
+    Route::post('/comments/{comment}/vote', [CommentVoteController::class, 'store'])
+    ->name('comments.vote')->middleware('auth');
 
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 });

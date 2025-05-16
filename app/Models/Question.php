@@ -53,6 +53,11 @@ class Question extends Model
         return $this->hasMany(QuestionVote::class); // Giả sử bạn có model QuestionVote
     }
 
+    public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
+
     // Hoặc nếu bạn dùng polymorphic relationship
     /*
     public function votes(): MorphMany

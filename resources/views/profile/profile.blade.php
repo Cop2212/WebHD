@@ -49,7 +49,7 @@
                         <div class="card-body">
                             <form action="{{ route('profile.update-password') }}" method="POST">
                                 @csrf
-                                @method('PUT')
+                                @method('PATCH')
 
                                 @if($errors->any())
                                     <div class="alert alert-danger">
@@ -107,9 +107,15 @@
                         <a href="{{ route('home') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i> Quay lại
                         </a>
-                        <a href="{{ route('profile.edit') }}" class="btn btn-primary">
-                            <i class="fas fa-edit me-1"></i> Chỉnh sửa
-                        </a>
+                        <div>
+        <a href="{{ route('questions.mine') }}" class="btn btn-info me-2">
+            <i class="fas fa-question-circle me-1"></i> Câu hỏi của tôi
+        </a>
+
+        <a href="{{ route('profile.edit') }}" class="btn btn-primary">
+            <i class="fas fa-edit me-1"></i> Chỉnh sửa
+        </a>
+    </div>
                     </div>
                 </div>
             </div>
