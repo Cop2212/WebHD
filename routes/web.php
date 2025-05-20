@@ -44,11 +44,12 @@ Route::middleware(['web'])->group(function () {
     // Questions Routes (public)
     Route::controller(QuestionController::class)->group(function () {
         Route::get('/questions', 'index')->name('questions.index');
-        Route::get('/questions/create', 'create')->name('questions.create');
-        Route::get('/questions/{question}', 'show')->name('questions.show');
+        // Đúng: đặt 'create' trước 'show'
+Route::get('/questions/create', 'create')->name('questions.create');
+Route::get('/questions/{question}', 'show')->name('questions.show');
 
-        // Thêm route vote nhưng chỉ cho authenticated users
-    Route::middleware('auth')->post('/questions/{question}/vote', 'vote')->name('questions.vote');
+    // Thêm route vote nhưng chỉ cho authenticated users
+Route::middleware('auth')->post('/questions/{question}/vote', 'vote')->name('questions.vote');
     });
 
     // Tags Routes (public)
@@ -59,6 +60,18 @@ Route::middleware(['web'])->group(function () {
 
 // Authenticated Routes
 Route::middleware(['auth', 'web'])->group(function () {
+
+    // Questions Management (create/edit/delete)
+    Route::resource('questions', QuestionController::class)
+        ->except(['index', 'show'])
+        ->names([
+            'create' => 'questions.create',
+            'store' => 'questions.store',
+            'edit' => 'questions.edit',
+            'update' => 'questions.update',
+            'destroy' => 'questions.destroy'
+        ]);
+
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/questions', [AdminController::class, 'questions'])->name('admin.questions');
@@ -94,17 +107,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     });
 
     Route::post('/send-email-verification', [UserController::class, 'sendEmailVerification']);
-
-    // Questions Management (create/edit/delete)
-    Route::resource('questions', QuestionController::class)
-        ->except(['index', 'show'])
-        ->names([
-            'create' => 'questions.create',
-            'store' => 'questions.store',
-            'edit' => 'questions.edit',
-            'update' => 'questions.update',
-            'destroy' => 'questions.destroy'
-        ]);
 
 
     Route::post('/questions/{question}/comments', [CommentController::class, 'store'])

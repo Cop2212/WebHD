@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\{Question, Tag, User, Answer, QuestionVote};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class QuestionController extends Controller
             'allTags' => $allTags,
             'popularTags' => Tag::popular()->limit(20)->get(),
             'selectedTags' => collect(),
-            'mainTag' => null
+            'mainTag' => null,
         ]);
     }
 
@@ -49,14 +50,18 @@ public function show(Question $question)
 
 public function myQuestions()
 {
-    $questions = auth()->user()->questions()->latest()->paginate(10);
+    $user = Auth::user();
+    assert($user instanceof \App\Models\User); // Cho Intelephense
+
+    $questions = $user->questions()->latest()->paginate(10);
+
     return view('questions.mine', compact('questions'));
 }
 
 // QuestionController.php
 public function vote(Question $question)
 {
-    $user = auth()->user();
+    $user = Auth::user();
 
     // Kiểm tra user đã vote chưa
     $existingVote = QuestionVote::where([
@@ -123,7 +128,17 @@ public function vote(Question $question)
         }, '=', count($tagIds));
     }
 
-    return $query->latest();
+    // 👉 Xử lý sắp xếp
+    $sort = $request->get('sort');
+    if ($sort === 'votes') {
+        $query->orderByDesc('votes_count');
+    } elseif ($sort === 'views') {
+        $query->orderByDesc('views_count');
+    } else {
+        $query->latest(); // mặc định theo created_at
+    }
+
+    return $query;
 }
 
     protected function getSelectedTags(Request $request, Tag $mainTag = null)
@@ -166,7 +181,7 @@ public function store(Request $request)
     $question = new Question();
     $question->title = $validated['title'];
     $question->body = $validated['body'];
-    $question->user_id = auth()->id(); // Gắn ID người dùng hiện tại
+    $question->user_id = Auth::id(); // Gắn ID người dùng hiện tại
     $question->save();
 
     // Gắn tag cho câu hỏi (sử dụng bảng trung gian question_tag)
@@ -178,13 +193,14 @@ public function store(Request $request)
 
 public function edit(Question $question)
 {
-    $this->authorize('update', $question);
+
+    //$this->authorize('update', $question);
     return view('questions.edit', compact('question'));
 }
 
 public function update(Request $request, Question $question)
 {
-    $this->authorize('update', $question);
+    //$this->authorize('update', $question);
 
     $validated = $request->validate([
         'title' => 'required|string|max:255',

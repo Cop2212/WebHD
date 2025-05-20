@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -11,7 +12,9 @@ class UserController extends Controller
 {
     public function sendEmailVerification(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
+
+        assert($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail);
 
         try {
             // Gửi thông báo xác minh email

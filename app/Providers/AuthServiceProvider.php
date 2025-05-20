@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Gate;
 // Nếu bạn có policy, import model và policy ở đây
 // use App\Models\Question;
 // use App\Policies\QuestionPolicy;
+use App\Models\Question;
+use App\Policies\QuestionPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -19,7 +21,7 @@ class AuthServiceProvider extends ServiceProvider
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
         // Question::class => QuestionPolicy::class,
 
-        \App\Models\Question::class => \App\Policies\QuestionPolicy::class,
+        Question::class => QuestionPolicy::class,
     ];
 
     /**

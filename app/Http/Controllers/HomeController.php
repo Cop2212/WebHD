@@ -75,6 +75,7 @@ class HomeController extends Controller
         $popularQuestions = Question::with(['user', 'tags', 'answers'])
             ->withCount(['answers', 'votes'])
             ->orderBy('answers_count', 'desc')
+            ->orderByDesc('vote_count')
             ->take(5)
             ->get();
 

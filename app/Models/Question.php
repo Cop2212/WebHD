@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -43,8 +45,9 @@ class Question extends Model
 
     public function isVotedByUser($userId = null)
 {
-    $userId = $userId ?? auth()->id();
-    return $this->votes()->where('user_id', $userId)->exists();
+    $userId = $userId ?? optional(Auth::user())->id;
+
+    return $userId && $this->votes()->where('user_id', $userId)->exists();
 }
 
     // Thêm relationship votes
