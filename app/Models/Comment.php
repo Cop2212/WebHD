@@ -16,6 +16,17 @@ class Comment extends Model
         return $this->belongsTo(User::class);
     }
 
+    protected static function booted()
+    {
+        static::created(function ($comment) {
+            $comment->question->increment('comments_count');
+        });
+
+        static::deleted(function ($comment) {
+            $comment->question->decrement('comments_count');
+        });
+    }
+
     public function question()
     {
         return $this->belongsTo(Question::class);

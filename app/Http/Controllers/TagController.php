@@ -6,6 +6,7 @@ use App\Models\Tag;
 use Illuminate\Support\Facades\DB;
 use App\Models\Question;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class TagController extends Controller
 {
@@ -37,4 +38,5 @@ class TagController extends Controller
 
     return view('tags.show', compact('tag', 'questions', 'usersCount', 'relatedTags'));
 }
+
 }

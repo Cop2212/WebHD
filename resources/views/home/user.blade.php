@@ -11,7 +11,7 @@
                 <h5 class="card-title mb-3">Lọc câu hỏi theo tag</h5>
 
                 <!-- Select2 Dropdown -->
-                <div class="mb-3">
+                {{-- <div class="mb-3">
                     <select name="tags[]" id="tag-select" class="form-select" multiple>
                         @foreach($allTags as $tag)
                             <option value="{{ $tag->id }}"
@@ -20,7 +20,7 @@
                             </option>
                         @endforeach
                     </select>
-                </div>
+                </div> --}}
 
                 <!-- Button Tags -->
                 <div class="tags-filter-container mb-3">

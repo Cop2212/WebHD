@@ -16,7 +16,7 @@ class Question extends Model
 
     protected $fillable = [
         'title', 'body', 'user_id', 'view_count',
-        'vote_count', 'answer_count', 'is_answered',
+        'vote_count', 'comments_count', 'is_answered',
         'is_closed', 'closed_at', 'closed_reason'
     ];
 

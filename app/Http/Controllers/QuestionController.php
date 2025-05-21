@@ -11,6 +11,7 @@ class QuestionController extends Controller
 {
     public function index(Request $request)
     {
+
         $questions = $this->buildQuestionQuery($request)->paginate(15);
         $allTags = Tag::withCount('questions')->orderBy('name')->get();
 
@@ -37,7 +38,7 @@ public function show(Question $question)
                   ])
                   ->orderByDesc('total_votes');
         }
-    ])->loadCount(['answers', 'votes', 'comments']);
+    ])->loadCount(['votes', 'comments']);
 
     $key = 'question_' . $question->id . '_viewed';
     if (!session()->has($key)) {
@@ -117,9 +118,8 @@ public function vote(Question $question)
     $query = Question::with([
             'user',
             'tags',
-            'answers' => fn($q) => $q->latest()->limit(3)
         ])
-        ->withCount(['answers', 'votes', 'views']);
+        ->withCount(['votes']);
 
     if ($selectedTags->isNotEmpty()) {
         $tagIds = $selectedTags->pluck('id')->toArray();
@@ -131,9 +131,9 @@ public function vote(Question $question)
     // 👉 Xử lý sắp xếp
     $sort = $request->get('sort');
     if ($sort === 'votes') {
-        $query->orderByDesc('votes_count');
+        $query->orderByDesc('vote_count');
     } elseif ($sort === 'views') {
-        $query->orderByDesc('views_count');
+        $query->orderByDesc('view_count');
     } else {
         $query->latest(); // mặc định theo created_at
     }

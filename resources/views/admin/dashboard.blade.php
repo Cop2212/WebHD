@@ -12,7 +12,33 @@
         </div>
     @endif
 
-    @include('admin.manager.question')
-    @include('admin.manager.tags')
-    @include('admin.manager.user')
+    <div class="row">
+    <div class="col-md-4">
+        <div class="card border-primary mb-3">
+            <div class="card-body text-center">
+                <h5 class="card-title">Quản lý Câu hỏi</h5>
+                <a href="{{ route('admin.questions') }}" class="btn btn-primary">Xem tất cả</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-success mb-3">
+            <div class="card-body text-center">
+                <h5 class="card-title">Quản lý Thẻ</h5>
+                <a href="{{ route('admin.tags') }}" class="btn btn-success">Xem tất cả</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-info mb-3">
+            <div class="card-body text-center">
+                <h5 class="card-title">Quản lý Người dùng</h5>
+                <a href="{{ route('admin.users') }}" class="btn btn-info">Xem tất cả</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection

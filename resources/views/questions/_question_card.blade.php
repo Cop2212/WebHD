@@ -40,9 +40,12 @@
                         <i class="fas fa-user me-1"></i>{{ $question->user->name }}
                         <i class="fas fa-clock mx-2"></i>{{ $question->created_at->diffForHumans() }}
                     </small>
+                    <span class="badge bg-light text-dark me-2">
+            <i class="fas fa-eye me-1"></i>{{ $question->view_count }} lượt xem
+        </span>
                     <!-- Sử dụng $question->answers_count -->
                     <span class="badge bg-light text-dark">
-                        <i class="fas fa-comment me-1"></i>{{ $question->answers_count }} trả lời
+                        <i class="fas fa-comment me-1"></i>{{ $question->comments_count }} bình luận
                     </span>
                 </div>
             </div>

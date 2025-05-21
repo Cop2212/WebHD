@@ -78,6 +78,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/tags', [AdminController::class, 'tags'])->name('admin.tags');
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
 
+    Route::post('/tags', [AdminController::class, 'store'])->name('admin.tags.store');
     Route::delete('questions/{id}', [AdminController::class, 'destroyQuestion'])->name('admin.questions.delete');
     Route::delete('tags/{id}', [AdminController::class, 'destroyTag'])->name('admin.tags.delete');
     Route::delete('users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.delete');
