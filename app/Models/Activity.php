@@ -50,8 +50,14 @@ class Activity extends Model
      */
     public static function log(string $type, $subject = null, array $data = [])
     {
+        /** @var \Illuminate\Contracts\Auth\Guard $auth */
+$auth = auth();
+
+/** @var \Illuminate\Contracts\Auth\Authenticatable|null $authUser */
+$authUser = $auth->user();
+
         return static::create([
-            'user_id' => auth()->id,
+            'user_id' => $authUser?->id,
             'type' => $type,
             'subject_id' => $subject?->id,
             'subject_type' => $subject ? get_class($subject) : null,

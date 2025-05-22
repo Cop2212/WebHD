@@ -16,19 +16,9 @@ class CreateVotesTable extends Migration
 
             // Thay đổi ở đây:
             $table->foreignId('question_id')->nullable()->constrained()->onDelete('no action');
-            $table->foreignId('answer_id')->nullable()->constrained()->onDelete('no action');
 
             $table->timestamps();
         });
-
-        // Thêm constraint CHECK bằng raw SQL
-        DB::statement('
-            ALTER TABLE votes ADD CONSTRAINT chk_vote_target
-            CHECK (
-                (question_id IS NOT NULL AND answer_id IS NULL) OR
-                (question_id IS NULL AND answer_id IS NOT NULL)
-            )
-        ');
     }
 
     public function down()

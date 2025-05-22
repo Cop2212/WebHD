@@ -16,7 +16,7 @@ class Question extends Model
 
     protected $fillable = [
         'title', 'body', 'user_id', 'view_count',
-        'vote_count', 'comments_count', 'is_answered',
+        'vote_count', 'comments_count',
         'is_closed', 'closed_at', 'closed_reason'
     ];
 
@@ -26,16 +26,6 @@ class Question extends Model
             'name' => 'Người dùng đã xóa',
             'id' => null
         ]);
-    }
-
-    public function answers(): HasMany
-    {
-        return $this->hasMany(Answer::class);
-    }
-
-    public function acceptedAnswer()
-    {
-        return $this->hasOne(Answer::class)->where('is_accepted', true);
     }
 
     public function tags(): BelongsToMany
@@ -76,4 +66,11 @@ class Question extends Model
             $query->whereIn('tags.id', $tagIds);
         }, '=', count($tagIds));
     }
+
+    protected static function booted()
+{
+    static::deleting(function ($question) {
+        $question->comments()->delete(); // xóa thủ công các comment
+    });
+}
 }

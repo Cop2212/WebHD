@@ -15,8 +15,6 @@ class QuestionFactory extends Factory
             'user_id' => User::inRandomOrder()->first()->id ?? User::factory(),
             'view_count' => $this->faker->numberBetween(0, 10000),
             'vote_count' => $this->faker->numberBetween(-10, 100),
-            'answer_count' => $this->faker->numberBetween(0, 20),
-            'is_answered' => $this->faker->boolean(30), // 30% cơ hội là true
             'is_closed' => $this->faker->boolean(10), // 10% cơ hội là true
             'closed_at' => $this->faker->optional(0.1)->dateTimeBetween('-1 year', 'now'), // 10% có giá trị
             'closed_reason' => $this->faker->optional(0.1)->randomElement([

@@ -31,9 +31,5 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Bạn có thể khai báo Gate ở đây nếu không dùng Policy
-        // Gate::define('update-question', function ($user, $question) {
-        //     return $user->id === $question->user_id;
-        // });
     }
 }

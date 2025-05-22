@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Question, User, Answer, Tag};
+use App\Models\{Question, User, Tag};
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
@@ -25,7 +25,6 @@ class HomeController extends Controller
         return [
             'totalUsers' => User::count(),
             'totalQuestions' => Question::count(),
-            'totalAnswers' => Answer::count(),
             'totalTags' => Tag::count()
         ];
     }
@@ -35,8 +34,8 @@ class HomeController extends Controller
     $user = Auth::user();
 
     $userQuestions = Question::where('user_id', $user->id)
-        ->with(['tags', 'answers'])
-        ->withCount(['answers', 'votes'])
+        ->with(['tags'])
+        ->withCount(['votes'])
         ->latest()
         ->paginate(10);
 
@@ -46,7 +45,6 @@ class HomeController extends Controller
         : [];
 
     $questions = Question::with(['user', 'tags'])
-    ->withCount('answers')
     ->when(!empty($selectedTagIds), function ($query) use ($selectedTagIds) {
         // Join bảng trung gian và đếm số lượng tag khớp với câu hỏi
         $query->whereHas('tags', function ($q) use ($selectedTagIds) {
@@ -72,9 +70,8 @@ class HomeController extends Controller
 
     protected function guestHome(array $stats)
     {
-        $popularQuestions = Question::with(['user', 'tags', 'answers'])
-            ->withCount(['answers', 'votes'])
-            ->orderBy('answers_count', 'desc')
+        $popularQuestions = Question::with(['user', 'tags'])
+            ->withCount(['votes'])
             ->orderByDesc('vote_count')
             ->take(5)
             ->get();

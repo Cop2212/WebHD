@@ -3,26 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
-use App\Models\{Question, Tag, User, Answer, QuestionVote};
+use App\Models\{Question, Tag, User, QuestionVote};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
-    public function index(Request $request)
-    {
+    // public function index(Request $request)
+    // {
 
-        $questions = $this->buildQuestionQuery($request)->paginate(15);
-        $allTags = Tag::withCount('questions')->orderBy('name')->get();
+    //     $questions = $this->buildQuestionQuery($request)->paginate(15);
+    //     $allTags = Tag::withCount('questions')->orderBy('name')->get();
 
-        return view('questions.index', [
-            'questions' => $questions,
-            'allTags' => $allTags,
-            'popularTags' => Tag::popular()->limit(20)->get(),
-            'selectedTags' => collect(),
-            'mainTag' => null,
-        ]);
-    }
+    //     return view('questions.index', [
+    //         'questions' => $questions,
+    //         'allTags' => $allTags,
+    //         'popularTags' => Tag::popular()->limit(20)->get(),
+    //         'selectedTags' => collect(),
+    //         'mainTag' => null,
+    //     ]);
+    // }
 
 public function show(Question $question)
 {
@@ -99,15 +99,6 @@ public function vote(Question $question)
             'selectedTags' => $this->getSelectedTags($request, $tag),
             'allTags' => $allTags,
             'popularTags' => Tag::popular()->limit(20)->get()
-        ]);
-    }
-
-    public function filter(Request $request)
-    {
-        $questions = $this->buildQuestionQuery($request)->paginate(15);
-
-        return response()->json([
-            'html' => view('questions.partials.list', compact('questions'))->render()
         ]);
     }
 

@@ -18,9 +18,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->integer('view_count')->default(0);
             $table->integer('vote_count')->default(0);
-            $table->integer('answer_count')->default(0);
-            $table->boolean('is_answered')->default(false);
-            $table->boolean('is_closed')->default(false);
             $table->timestamp('closed_at')->nullable();
             $table->string('closed_reason', 255)->nullable();
             $table->timestamps();

@@ -6,14 +6,13 @@ use App\Models\Tag;
 use Illuminate\Support\Facades\DB;
 use App\Models\Question;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class TagController extends Controller
 {
     public function show(Tag $tag)
 {
     $questions = $tag->questions()
-        ->with(['user', 'tags', 'answers'])
+        ->with(['user', 'tags'])
         ->latest()
         ->paginate(15);
 

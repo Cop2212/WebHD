@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
-    use SoftDeletes;
 
     protected $fillable = [
         'username',
@@ -42,13 +41,18 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     public function questions(): HasMany
     {
         return $this->hasMany(Question::class);
     }
 
-    public function answers()
-{
-    return $this->hasMany(Answer::class);
-}
+    public function votes()
+    {
+        return $this->hasMany(CommentVote::class);
+    }
 }

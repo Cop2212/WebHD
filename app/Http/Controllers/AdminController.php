@@ -55,9 +55,16 @@ class AdminController extends Controller
 
     public function destroyQuestion($id) {
         $question = Question::findOrFail($id);
-        $question->delete();
+        // Lấy tất cả comment IDs của question
+    $commentIds = $question->comments()->pluck('id');
 
-        return redirect()->route('admin.question')->with('success', 'Câu hỏi đã được xóa thành công.');
+    // Xóa votes của các comment đó
+    \App\Models\CommentVote::whereIn('comment_id', $commentIds)->delete();
+
+        $question->comments()->delete();
+        $question->forceDelete();
+
+        return redirect()->route('admin.questions')->with('success', 'Câu hỏi đã được xóa thành công.');
     }
 
     public function destroyTag($id) {
@@ -69,6 +76,26 @@ class AdminController extends Controller
 
     public function destroyUser($id) {
         $user = User::findOrFail($id);
+        // 1. Xóa votes của comments mà user tạo
+    $userCommentIds = $user->comments()->pluck('id');
+    \App\Models\CommentVote::whereIn('comment_id', $userCommentIds)->delete();
+
+    // 2. Xóa comments mà user tạo
+    $user->comments()->delete();
+
+    // 3. Xóa votes, comments của questions mà user tạo
+    $userQuestionIds = $user->questions()->pluck('id');
+
+    // Xóa votes của comment thuộc câu hỏi của user
+    $commentIdsOfQuestions = \App\Models\Comment::whereIn('question_id', $userQuestionIds)->pluck('id');
+    \App\Models\CommentVote::whereIn('comment_id', $commentIdsOfQuestions)->delete();
+
+    // Xóa comments thuộc câu hỏi của user
+    \App\Models\Comment::whereIn('question_id', $userQuestionIds)->delete();
+
+    // 4. Xóa câu hỏi của user
+    \App\Models\Question::whereIn('id', $userQuestionIds)->delete();
+
         $user->delete();
 
         return redirect()->route('admin.users')->with('success', 'Người dùng đã được xóa thành công.');

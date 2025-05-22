@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('comment_votes', function (Blueprint $table) {
     $table->id();
     $table->foreignId('user_id')->constrained()->onDelete('cascade');
-    $table->foreignId('comment_id')->constrained();
+    $table->unsignedBigInteger('comment_id')->nullable();
+    $table->foreign('comment_id')->references('id')->on('comments')->onDelete('cascade');
     $table->tinyInteger('value'); // 1 = upvote, -1 = downvote
     $table->timestamps();
 
