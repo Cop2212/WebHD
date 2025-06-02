@@ -24,3 +24,5 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Laravel yêu cầu thư mục storage và bootstrap/cache phải ghi được
 RUN chmod -R 775 storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
+
+RUN php artisan key:generate
