@@ -45,11 +45,11 @@ Route::middleware(['web'])->group(function () {
     Route::controller(QuestionController::class)->group(function () {
         Route::get('/questions', 'index')->name('questions.index');
         // Đúng: đặt 'create' trước 'show'
-Route::get('/questions/create', 'create')->name('questions.create');
-Route::get('/questions/{question}', 'show')->name('questions.show');
+        Route::get('/questions/create', 'create')->name('questions.create');
+        Route::get('/questions/{question}', 'show')->name('questions.show');
 
-    // Thêm route vote nhưng chỉ cho authenticated users
-Route::middleware('auth')->post('/questions/{question}/vote', 'vote')->name('questions.vote');
+        // Thêm route vote nhưng chỉ cho authenticated users
+        Route::middleware('auth')->post('/questions/{question}/vote', 'vote')->name('questions.vote');
     });
 
     // Tags Routes (public)
@@ -72,17 +72,17 @@ Route::middleware(['auth', 'web'])->group(function () {
             'destroy' => 'questions.destroy'
         ]);
 
-Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
-    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/questions', [AdminController::class, 'questions'])->name('admin.questions');
-    Route::get('/tags', [AdminController::class, 'tags'])->name('admin.tags');
-    Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+        Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/questions', [AdminController::class, 'questions'])->name('admin.questions');
+        Route::get('/tags', [AdminController::class, 'tags'])->name('admin.tags');
+        Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
 
-    Route::post('/tags', [AdminController::class, 'store'])->name('admin.tags.store');
-    Route::delete('questions/{id}', [AdminController::class, 'destroyQuestion'])->name('admin.questions.delete');
-    Route::delete('tags/{id}', [AdminController::class, 'destroyTag'])->name('admin.tags.delete');
-    Route::delete('users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.delete');
-});
+        Route::post('/tags', [AdminController::class, 'store'])->name('admin.tags.store');
+        Route::delete('questions/{id}', [AdminController::class, 'destroyQuestion'])->name('admin.questions.delete');
+        Route::delete('tags/{id}', [AdminController::class, 'destroyTag'])->name('admin.tags.delete');
+        Route::delete('users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.delete');
+    });
 
 
 
@@ -111,11 +111,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
 
     Route::post('/questions/{question}/comments', [CommentController::class, 'store'])
-    ->name('questions.comments.store')
-    ->middleware('auth');
+        ->name('questions.comments.store')
+        ->middleware('auth');
 
     Route::post('/comments/{comment}/vote', [CommentVoteController::class, 'store'])
-    ->name('comments.vote')->middleware('auth');
+        ->name('comments.vote')->middleware('auth');
 
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 });

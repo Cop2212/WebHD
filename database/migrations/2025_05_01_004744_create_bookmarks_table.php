@@ -17,40 +17,41 @@ class CreateBookmarksTable extends Migration
             $table->primary(['user_id', 'question_id']);
         });
 
-        // Sử dụng CREATE OR ALTER (SQL Server 2016+) hoặc kiểm tra tồn tại
-        DB::unprepared('
-            IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = \'P\' AND name = \'sp_delete_question_with_bookmarks\')
-            BEGIN
-                EXEC(\'
-                    CREATE PROCEDURE sp_delete_question_with_bookmarks(@question_id INT)
-                    AS
-                    BEGIN
-                        BEGIN TRANSACTION;
-                        DELETE FROM bookmarks WHERE question_id = @question_id;
-                        DELETE FROM questions WHERE id = @question_id;
-                        COMMIT;
-                    END
-                \')
-            END
-            ELSE
-            BEGIN
-                EXEC(\'
-                    ALTER PROCEDURE sp_delete_question_with_bookmarks(@question_id INT)
-                    AS
-                    BEGIN
-                        BEGIN TRANSACTION;
-                        DELETE FROM bookmarks WHERE question_id = @question_id;
-                        DELETE FROM questions WHERE id = @question_id;
-                        COMMIT;
-                    END
-                \')
-            END
-        ');
+        // Chỉ tạo procedure nếu dùng SQL Server
+        if (DB::getDriverName() === 'sqlsrv') {
+            DB::unprepared('
+                IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = \'P\' AND name = \'sp_delete_question_with_bookmarks\')
+                BEGIN
+                    EXEC(\'CREATE PROCEDURE sp_delete_question_with_bookmarks(@question_id INT)
+                        AS
+                        BEGIN
+                            BEGIN TRANSACTION;
+                            DELETE FROM bookmarks WHERE question_id = @question_id;
+                            DELETE FROM questions WHERE id = @question_id;
+                            COMMIT;
+                        END\')
+                END
+                ELSE
+                BEGIN
+                    EXEC(\'ALTER PROCEDURE sp_delete_question_with_bookmarks(@question_id INT)
+                        AS
+                        BEGIN
+                            BEGIN TRANSACTION;
+                            DELETE FROM bookmarks WHERE question_id = @question_id;
+                            DELETE FROM questions WHERE id = @question_id;
+                            COMMIT;
+                        END\')
+                END
+            ');
+        }
     }
 
     public function down()
     {
-        DB::unprepared('DROP PROCEDURE IF EXISTS sp_delete_question_with_bookmarks');
+        if (DB::getDriverName() === 'sqlsrv') {
+            DB::unprepared('DROP PROCEDURE IF EXISTS sp_delete_question_with_bookmarks');
+        }
+
         Schema::dropIfExists('bookmarks');
     }
 }

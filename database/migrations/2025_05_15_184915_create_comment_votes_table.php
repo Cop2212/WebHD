@@ -15,7 +15,7 @@ return new class extends Migration
     $table->id();
     $table->foreignId('user_id')->constrained()->onDelete('cascade');
     $table->unsignedBigInteger('comment_id')->nullable();
-    $table->foreign('comment_id')->references('id')->on('comments')->onDelete('cascade');
+    $table->foreign('comment_id')->references('id')->on('comments')->onDelete('no action');
     $table->tinyInteger('value'); // 1 = upvote, -1 = downvote
     $table->timestamps();
 

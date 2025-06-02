@@ -17,41 +17,16 @@ class CreateCommentsTable extends Migration
         $table->timestamps();
     });
 
-    // ❌ Tạo procedure chỉ cho question
-    DB::unprepared('
-        IF NOT EXISTS (SELECT * FROM sys.objects WHERE type = \'P\' AND name = \'sp_delete_question_with_comments\')
-        BEGIN
-            EXEC(\'
-                CREATE PROCEDURE sp_delete_question_with_comments(@question_id INT)
-                AS
-                BEGIN
-                    BEGIN TRANSACTION;
-                    DELETE FROM comments WHERE question_id = @question_id;
-                    DELETE FROM questions WHERE id = @question_id;
-                    COMMIT;
-                END
-            \')
-        END
-        ELSE
-        BEGIN
-            EXEC(\'
-                ALTER PROCEDURE sp_delete_question_with_comments(@question_id INT)
-                AS
-                BEGIN
-                    BEGIN TRANSACTION;
-                    DELETE FROM comments WHERE question_id = @question_id;
-                    DELETE FROM questions WHERE id = @question_id;
-                    COMMIT;
-                END
-            \')
-        END
-    ');
+    // ❌ Xoá đoạn stored procedure này vì SQLite không hỗ trợ
+    // DB::unprepared(...);
 }
 
 public function down()
 {
-    DB::unprepared('DROP PROCEDURE IF EXISTS sp_delete_question_with_comments');
+    // Không cần DROP PROCEDURE nếu không tạo
+    // DB::unprepared('DROP PROCEDURE IF EXISTS sp_delete_question_with_comments');
     Schema::dropIfExists('comments');
 }
+
 
 }
