@@ -5,7 +5,6 @@ RUN apt-get update && apt-get install -y \
     libzip-dev unzip libonig-dev \
     && docker-php-ext-install pdo pdo_mysql zip mbstring
 
-
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
@@ -21,3 +20,6 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Laravel storage link, permissions...
 RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+
+# Trỏ Apache DocumentRoot đến thư mục public/
+RUN rm -rf /var/www/html && ln -s /var/www/html/public /var/www/html
