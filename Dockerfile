@@ -1,5 +1,5 @@
-# Sử dụng PHP 8.1 với FPM
-FROM php:8.1-fpm
+# Sử dụng PHP 8.2 với FPM
+FROM php:8.2-fpm
 
 # Cài các extensions cần thiết cho Laravel
 RUN apt-get update && apt-get install -y \
