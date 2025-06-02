@@ -2,8 +2,9 @@ FROM php:8.2-apache
 
 # Cài extension PHP cần thiết
 RUN apt-get update && apt-get install -y \
-    libzip-dev unzip \
+    libzip-dev unzip libonig-dev \
     && docker-php-ext-install pdo pdo_mysql zip mbstring
+
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
